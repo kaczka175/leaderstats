@@ -1,0 +1,40 @@
+local DSS = game:GetService("DataStoreService")
+local dogecoinDataStore = DSS:GetDataStore("dogecoins")
+
+game.Players.PlayerAdded:Connect(function(player)
+	local leaderstats = Instance.new("Folder",player)
+	leaderstats.Name = "leaderstats"
+	
+	local dogecoins = Instance.new("IntValue",leaderstats)
+	dogecoins.Name = "dogecoins"
+	dogecoins.Value = 0
+	
+	local playerUserId = "player_"..player.UserId
+	
+	local dogecoinData
+	local succes, errormessage = pcall(function()
+		dogecoinData = dogecoinDataStore:GetAsync(playerUserId)
+	end)
+	
+	if succes then
+		dogecoins.Value = dogecoinData
+	end
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+	local playerUserId = "player_"..player.UserId
+	local dogecoinValue = player.leaderstats.dogecoins.Value
+	local succes, errormessage = pcall(function()
+		dogecoinDataStore:GetAsync(playerUserId, dogecoinValue)
+	end)
+end)
+
+game:BindToClose(function()
+	for _, player in pairs(game.Players:GetPlayers()) do
+		local playerUserId = "player_"..player.UserId
+		local dogecoinValue = player.leaderstats.dogecoins.Value
+		local succes, errormessage = pcall(function()
+			dogecoinDataStore:GetAsync(playerUserId, dogecoinValue)
+		end)
+	end
+end)
